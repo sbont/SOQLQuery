@@ -1,11 +1,10 @@
 public class NestedConditionExpression extends ConditionExpression {
-
     List<ConditionExpression> conditionExpressions;
     String logicalOptr;
 
     public NestedConditionExpression(List<ConditionExpression> conditionExpressions, String logicalOptr) {
         if(logicalOptr == LogicalOperator.NOT_X && conditionExpressions.size() != 1) {
-            throw new SOQLQueryException('A \'NOT\' expression cannot have more than one condition.');
+            throw new SOQLQueryBuilderException('A \'NOT\' expression cannot have more than one condition.');
         }
         this.conditionExpressions = conditionExpressions;
         this.logicalOptr = logicalOptr;
@@ -13,7 +12,7 @@ public class NestedConditionExpression extends ConditionExpression {
 
     public void add(ConditionExpression conditionExpression) {
         if(logicalOptr == LogicalOperator.NOT_X) {
-            throw new SOQLQueryException('A \'NOT\' expression cannot have more than one condition.');
+            throw new SOQLQueryBuilderException('A \'NOT\' expression cannot have more than one condition.');
         }
         conditionExpressions.add(conditionExpression);
     }
@@ -36,5 +35,9 @@ public class NestedConditionExpression extends ConditionExpression {
         } else {
             return String.join(parts, ' ' + logicalOptr + ' ');
         }
+    }
+
+    public List<ConditionExpression> getConditionExpressions() {
+        return this.conditionExpressions;
     }
 }

@@ -1,10 +1,12 @@
-public class SelectField implements QueryItem, Comparable {
+public class SelectField implements SelectItem, Comparable {
 
-    private SObjectField field;
+    private final SObjectField field;
+    private Boolean toLabel;
     protected SelectField relatedTarget;
 
     public SelectField(SObjectField field) {
         this.field = field;
+        this.toLabel = false;
     }
 
     public static SelectField createFromFieldPath(List<SObjectField> fieldPath) {
@@ -35,6 +37,10 @@ public class SelectField implements QueryItem, Comparable {
             relatedTarget.pointToRelatedField(field);
         }
         return this;
+    }
+
+    public void setToLabel() {
+        this.toLabel = true;
     }
 
     public Boolean isRelatedField() {

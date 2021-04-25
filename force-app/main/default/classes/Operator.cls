@@ -10,4 +10,6 @@ public class Operator {
     public static String LIKE_X = 'LIKE';
     public static String IN_X = 'IN';
     public static String NOT_IN_X = 'NOT IN';
+    public static String INCLUDES = 'INCLUDES';
+    public static String EXCLUDES = 'EXCLUDES';
 }
