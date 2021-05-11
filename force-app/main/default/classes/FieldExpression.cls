@@ -122,12 +122,6 @@ public class FieldExpression extends ConditionExpression implements RequiresOper
                 values.add( writeValue( o, targetType ) );
             }
             return '(' + String.join(values, ', ') + ')';
-        } else if(value instanceof List<Id>) {
-            List<String> values = new List<String>();
-            for(String o : (List<Id>) value) {
-                values.add( writeValue( o, targetType ) );
-            }
-            return '(' + String.join(values, ', ') + ')';
         } else if(value instanceof SOQLQueryBuilder) {
             SOQLQueryBuilder subquery = (SOQLQueryBuilder) value;
             return subquery.toString();
