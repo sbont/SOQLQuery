@@ -6,9 +6,9 @@ public class FieldExpression extends ConditionExpression implements RequiresOper
     private SelectField field;
     private String opr;
     private Object value;
-    private SOQLQueryBuilder queryBuilder;
+    private QueryBuilder queryBuilder;
 
-    public FieldExpression(SelectField field, SOQLQueryBuilder queryBuilder) {
+    public FieldExpression(SelectField field, QueryBuilder queryBuilder) {
         this.field = field;
         this.queryBuilder = queryBuilder;
     }
@@ -21,54 +21,54 @@ public class FieldExpression extends ConditionExpression implements RequiresOper
         return this.field.getSObjectField().getDescribe().getSoapType();
     }
 
-    public SOQLQueryBuilder equals(Object value) {
+    public QueryBuilder equals(Object value) {
         this.opr = Operator.EQUALS;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder notEquals(Object value) {
+    public QueryBuilder notEquals(Object value) {
         this.opr = Operator.NOT_EQUALS;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder lessThan(Object value) {
+    public QueryBuilder lessThan(Object value) {
         this.opr = Operator.LESS_THAN;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder greaterThan(Object value) {
+    public QueryBuilder greaterThan(Object value) {
         this.opr = Operator.GREATER_THAN;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder equalsOrLess(Object value) {
+    public QueryBuilder equalsOrLess(Object value) {
         this.opr = Operator.LESS_OR_EQUAL;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder equalsOrMore(Object value) {
+    public QueryBuilder equalsOrMore(Object value) {
         this.opr = Operator.GREATER_OR_EQUAL;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder isLike(Object value) {
+    public QueryBuilder isLike(Object value) {
         this.opr = Operator.LIKE_X;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder isIn(Object value) {
+    public QueryBuilder isIn(Object value) {
         validateCollection(value);
         this.opr = Operator.IN_X;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder isNotIn(Object value) {
+    public QueryBuilder isNotIn(Object value) {
         validateCollection(value);
         this.opr = Operator.NOT_IN_X;
         this.value = value;
         return queryBuilder;
     }
-    public SOQLQueryBuilder includes(Object value) {
+    public QueryBuilder includes(Object value) {
         validateCollection(value);
         this.opr = Operator.INCLUDES;
         if(value instanceof String) {
@@ -78,7 +78,7 @@ public class FieldExpression extends ConditionExpression implements RequiresOper
         }
         return queryBuilder;
     }
-    public SOQLQueryBuilder excludes(Object value) {
+    public QueryBuilder excludes(Object value) {
         validateCollection(value);
         this.opr = Operator.EXCLUDES;
         if(value instanceof String) {
@@ -122,8 +122,8 @@ public class FieldExpression extends ConditionExpression implements RequiresOper
                 values.add( writeValue( o, targetType ) );
             }
             return '(' + String.join(values, ', ') + ')';
-        } else if(value instanceof SOQLQueryBuilder) {
-            SOQLQueryBuilder subquery = (SOQLQueryBuilder) value;
+        } else if(value instanceof QueryBuilder) {
+            QueryBuilder subquery = (QueryBuilder) value;
             return subquery.toString();
         } else {
             return '\'' + String.valueOf(value) + '\'';
@@ -147,7 +147,7 @@ public class FieldExpression extends ConditionExpression implements RequiresOper
     }
 
     private void throwEmptyCollectionException() {
-        throw new SOQLQueryBuilderException('Empty collection provided for filter on field ' + field.toString());
+        throw new QueryBuilderException('Empty collection provided for filter on field ' + field.toString());
     }
 
 }

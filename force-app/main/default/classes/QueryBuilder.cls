@@ -1,4 +1,4 @@
-public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter {
+public with sharing class QueryBuilder implements SelectItem, AcceptsFilter {
 
     private SObjectType targetObject;
     private ChildRelationship targetRelationship;
@@ -9,31 +9,31 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
     private List<SortOrder> sortOrders;
     private Integer maxRows;
 
-    public SOQLQueryBuilder(SObjectType sObjectType) {
+    public QueryBuilder(SObjectType sObjectType) {
         this.targetObject = sObjectType;
         selectItems = new List<SelectItem>();
         sortOrders = new List<SortOrder>();
     }
 
-    private SOQLQueryBuilder(ChildRelationship childRelationship) {
+    private QueryBuilder(ChildRelationship childRelationship) {
         this.targetRelationship = childRelationship;
         this.targetObject = childRelationship.childSObject;
         selectItems = new List<SelectItem>();
         sortOrders = new List<SortOrder>();
     }
 
-    public SOQLQueryBuilder subquery(SOQLQueryBuilder subquery) {
+    public QueryBuilder subquery(QueryBuilder subquery) {
         selectItems.add(subquery);
         return this;
     }
 
-    public SOQLQueryBuilder getSubquery(String relationshipName) {
+    public QueryBuilder getSubquery(String relationshipName) {
         for(ChildRelationship relationship : targetObject.getDescribe().getChildRelationships()) {
             if(relationship.getRelationshipName() == relationshipName) {
-                return new SOQLQueryBuilder(relationship);
+                return new QueryBuilder(relationship);
             }
         }
-        throw new SOQLQueryBuilderException('No relationship found with name ' + relationshipName);
+        throw new QueryBuilderException('No relationship found with name ' + relationshipName);
     }
 
     public String soql() {
@@ -75,16 +75,16 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
         return '(' + soql() + ')';
     }
 
-    public SOQLQueryBuilder fields(List<SObjectField> fields) {
+    public QueryBuilder fields(List<SObjectField> fields) {
         for(SObjectField field : fields) {
             field(field);
         }
         return this;
     }
 
-    public SOQLQueryBuilder fieldToLabel(SObjectField field) {
+    public QueryBuilder fieldToLabel(SObjectField field) {
         if(field == null) {
-            throw new SOQLQueryBuilderException('Provided SObjectField cannot be null.');
+            throw new QueryBuilderException('Provided SObjectField cannot be null.');
         }
         SelectField selectField = new SelectField(field);
         selectField.setToLabel();
@@ -92,27 +92,27 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
         return this;
     }
 
-    public SOQLQueryBuilder field(SObjectField field) {
+    public QueryBuilder field(SObjectField field) {
         if(field == null) {
-            throw new SOQLQueryBuilderException('Provided SObjectField cannot be null.');
+            throw new QueryBuilderException('Provided SObjectField cannot be null.');
         }
         SelectField selectField = new SelectField(field);
         addSelectField(selectField);
         return this;
     }
 
-    public SOQLQueryBuilder relatedFields(SObjectField relationshipField, List<SObjectField> targetFields) {
+    public QueryBuilder relatedFields(SObjectField relationshipField, List<SObjectField> targetFields) {
         for(SObjectField targetField : targetFields) {
             relatedField(relationshipField, targetField);
         }
         return this;
     }
 
-    public SOQLQueryBuilder relatedField(SObjectField relationshipField, SObjectField targetField) {
+    public QueryBuilder relatedField(SObjectField relationshipField, SObjectField targetField) {
         return relatedField(new List<SObjectField>{relationshipField, targetField});
     }
 
-    public SOQLQueryBuilder relatedField(List<SObjectField> fieldPath) {
+    public QueryBuilder relatedField(List<SObjectField> fieldPath) {
         SelectField selectField = new SelectField(fieldPath[0]);
         for(Integer i = 1; i < fieldPath.size(); i++) {
             SObjectField sObjectField = fieldPath[i];
@@ -122,37 +122,37 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
         return this;
     }
 
-    public SOQLQueryBuilder fieldSet(String fieldSetName) {
+    public QueryBuilder fieldSet(String fieldSetName) {
         FieldSet fieldSet = targetObject.getDescribe().FieldSets.getMap().get(fieldSetName);
-        if(fieldSet == null) throw new SOQLQueryBuilderException('Field Set not found with name ' + fieldSetName + '.');
+        if(fieldSet == null) throw new QueryBuilderException('Field Set not found with name ' + fieldSetName + '.');
         fieldSet(fieldSet);
         return this;
     }
 
-    public SOQLQueryBuilder fieldSet(FieldSet fieldSet) {
+    public QueryBuilder fieldSet(FieldSet fieldSet) {
         for(FieldSetMember fieldSetMember : fieldSet.getFields()) {
             field(fieldSetMember.getSObjectField());
         }
         return this;
     }
 
-    public SOQLQueryBuilder relatedFieldSet(SObjectField relationshipField, String fieldSetName) {
+    public QueryBuilder relatedFieldSet(SObjectField relationshipField, String fieldSetName) {
         SObjectType targetObjectType = relationshipField.getDescribe().getReferenceTo()[0];
         FieldSet fieldSet = targetObjectType.getDescribe().FieldSets.getMap().get(fieldSetName);
-        if(fieldSet == null) throw new SOQLQueryBuilderException('Field Set not found on object ' + targetObjectType + ' with name ' + fieldSetName + '.');
+        if(fieldSet == null) throw new QueryBuilderException('Field Set not found on object ' + targetObjectType + ' with name ' + fieldSetName + '.');
         relatedFieldSet(relationshipField, fieldSet);
         return this;
     }
 
-    public SOQLQueryBuilder relatedFieldSet(SObjectField relationshipField, FieldSet fieldSet) {
+    public QueryBuilder relatedFieldSet(SObjectField relationshipField, FieldSet fieldSet) {
         for(FieldSetMember fieldSetMember : fieldSet.getFields()) {
             relatedField(new List<SObjectField>{relationshipField, fieldSetMember.getSObjectField()});
         }
         return this;
     }
 
-    public SOQLQueryBuilder whereClause(String whereClause) {
-        if(whereConditionExpression != null) throw new SOQLQueryBuilderException('Use either a String as WHERE clause, or an expression. You cannot use both at the same time.');
+    public QueryBuilder whereClause(String whereClause) {
+        if(whereConditionExpression != null) throw new QueryBuilderException('Use either a String as WHERE clause, or an expression. You cannot use both at the same time.');
         this.whereClause = whereClause;
         return this;
     }
@@ -162,7 +162,7 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
     }
 
     public RequiresOperator filter(List<SObjectField> fieldPath) {
-        if(whereClause != null) throw new SOQLQueryBuilderException('Use either a String as WHERE clause, or an expression. You cannot use both at the same time.');
+        if(whereClause != null) throw new QueryBuilderException('Use either a String as WHERE clause, or an expression. You cannot use both at the same time.');
         SelectField selectField = SelectField.createFromFieldPath(fieldPath);
         ConditionExpression newExpression = new FieldExpression(selectField, this);
         if(whereConditionExpression != null) {
@@ -179,7 +179,7 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
         return (RequiresOperator) newExpression;
     }
 
-    public SOQLQueryBuilder filterLogic(String logic) {
+    public QueryBuilder filterLogic(String logic) {
         this.whereConditionExpression = parseToken(logic);
         return this;
     }
@@ -258,42 +258,42 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
         return new NestedConditionExpression(subExpressions, operator);
     }
 
-    public SOQLQueryBuilder orderBy(SObjectField field) {
+    public QueryBuilder orderBy(SObjectField field) {
         SortOrder sortOrder = new SortOrder(field, this);
         sortOrders.add(sortOrder);
         return this;
     }
 
-    public SOQLQueryBuilder ascending() {
+    public QueryBuilder ascending() {
         SortOrder last = sortOrders.get(sortOrders.size() - 1);
         last.ascending();
         return this;
     }
 
-    public SOQLQueryBuilder descending() {
+    public QueryBuilder descending() {
         SortOrder last = sortOrders.get(sortOrders.size() - 1);
         last.descending();
         return this;
     }
 
-    public SOQLQueryBuilder nullsFirst() {
+    public QueryBuilder nullsFirst() {
         SortOrder last = sortOrders.get(sortOrders.size() - 1);
         last.nullsFirst();
         return this;
     }
 
-    public SOQLQueryBuilder nullsLast() {
+    public QueryBuilder nullsLast() {
         SortOrder last = sortOrders.get(sortOrders.size() - 1);
         last.nullsLast();
         return this;
     }
 
-    public SOQLQueryBuilder withSecurityEnforced() {
+    public QueryBuilder withSecurityEnforced() {
         this.withSecurityEnforced = true;
         return this;
     }
 
-    public SOQLQueryBuilder setLimit(Integer maxRows) {
+    public QueryBuilder setLimit(Integer maxRows) {
         this.maxRows = maxRows;
         return this;
     }
@@ -337,8 +337,8 @@ public with sharing class SOQLQueryBuilder implements SelectItem, AcceptsFilter 
     }
 
     public Boolean equals(Object other) {
-        if(other instanceof SOQLQueryBuilder) {
-            SOQLQueryBuilder otherQuery = (SOQLQueryBuilder) other;
+        if(other instanceof QueryBuilder) {
+            QueryBuilder otherQuery = (QueryBuilder) other;
             return this.soql() == otherQuery.soql();
         } else {
             return false;

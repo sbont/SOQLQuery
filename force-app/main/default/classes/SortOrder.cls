@@ -3,12 +3,12 @@
  */
 
 public class SortOrder {
-    private final SOQLQueryBuilder QueryBuilder;
+    private final QueryBuilder QueryBuilder;
     private final SObjectField Field;
     private SortDirection direction;
     private NullsOrder order;
 
-    public SortOrder(SObjectField field, SOQLQueryBuilder queryBuilder) {
+    public SortOrder(SObjectField field, QueryBuilder queryBuilder) {
         this.QueryBuilder = queryBuilder;
         this.Field = field;
     }

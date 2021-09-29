@@ -1,9 +1,9 @@
 @IsTest
-private class SOQLQueryBuilder_Test {
+private class QueryBuilder_Test {
 
     @IsTest
     static void soql() {
-        SOQLQueryBuilder query = new SOQLQueryBuilder(Account.SObjectType)
+        QueryBuilder query = new QueryBuilder(Account.SObjectType)
                 .field(Account.Id)
                 .fields(new List<SObjectField>{Account.Name, Account.Description})
                 .fieldToLabel(Account.Type)
@@ -34,7 +34,7 @@ private class SOQLQueryBuilder_Test {
         insert acc2;
 
         Test.startTest();
-        List<Account> results = (List<Account>) new SOQLQueryBuilder(Account.SObjectType)
+        List<Account> results = (List<Account>) new QueryBuilder(Account.SObjectType)
                 .field(Account.Id)
                 .fields(new List<SObjectField>{Account.Name, Account.Description})
                 .query();
@@ -57,7 +57,7 @@ private class SOQLQueryBuilder_Test {
         insert acc2;
 
         Test.startTest();
-        Account first = (Account) new SOQLQueryBuilder(Account.SObjectType)
+        Account first = (Account) new QueryBuilder(Account.SObjectType)
                 .field(Account.Id)
                 .orderBy(Account.Name).descending()
                 .first();
@@ -84,12 +84,12 @@ private class SOQLQueryBuilder_Test {
         insert c;
 
         Test.startTest();
-        SOQLQueryBuilder query = new SOQLQueryBuilder(Account.SObjectType)
+        QueryBuilder query = new QueryBuilder(Account.SObjectType)
                 .field(Account.Id)
                 .fields(new List<SObjectField>{Account.Name, Account.Description})
                 .relatedFields(Account.ParentId, new List<SObjectField>{Account.Id, Account.Name, Account.OwnerId})
                 .filter(Account.ParentId).notEquals(null);
-        SOQLQueryBuilder contacts = query.getSubquery('Contacts')
+        QueryBuilder contacts = query.getSubquery('Contacts')
                 .field(Contact.Email)
                 .field(Contact.Id)
                 .whereClause('Email != null')
@@ -97,7 +97,7 @@ private class SOQLQueryBuilder_Test {
         String errorMessage;
         try {
             query.field(null);
-        } catch(SOQLQueryBuilderException e) {
+        } catch(QueryBuilderException e) {
             errorMessage = e.getMessage();
         }
         query.subquery(contacts);
@@ -132,7 +132,7 @@ private class SOQLQueryBuilder_Test {
         insert contact;
 
         Test.startTest();
-        SOQLQueryBuilder query = new SOQLQueryBuilder(Account.SObjectType)
+        QueryBuilder query = new QueryBuilder(Account.SObjectType)
                 .field(Account.Id)
                 .fields(new List<SObjectField>{Account.Name, Account.Description})
                 .relatedFields(Account.ParentId, new List<SObjectField>{Account.Id, Account.Name, Account.OwnerId})
@@ -149,7 +149,7 @@ private class SOQLQueryBuilder_Test {
                 .filter(Account.OwnerId).isNotIn(new List<Id>{parent.Id})
                 .filter(Account.BillingCity).isNotIn(new List<String>{'Amsterdam'})
                 .filter(Account.ParentId).isIn(
-                    new SOQLQueryBuilder(Account.SObjectType).field(Account.Id).filter(Account.Name).equals('SFDC'))
+                    new QueryBuilder(Account.SObjectType).field(Account.Id).filter(Account.Name).equals('SFDC'))
                 .filterLogic('1 AND 2 AND 3 AND 4 AND (5 OR 6 AND 7) AND 8 AND 9 AND 10 AND 11');
         List<Account> results = (List<Account>) query.query();
 
@@ -168,7 +168,7 @@ private class SOQLQueryBuilder_Test {
         insert qt;
 
         Test.startTest();
-        QuickText result = (QuickText) new SOQLQueryBuilder(QuickText.SObjectType)
+        QuickText result = (QuickText) new QueryBuilder(QuickText.SObjectType)
                 .field(QuickText.Id)
                 .field(QuickText.Message)
                 .filter(QuickText.Channel).includes('Email')
@@ -191,14 +191,14 @@ private class SOQLQueryBuilder_Test {
         String errorMessage;
         if(fs == null) {
             try {
-                soql = new SOQLQueryBuilder(Account.SObjectType)
+                soql = new QueryBuilder(Account.SObjectType)
                         .fieldSet('NonExistingFieldSet')
                         .soql();
             } catch (Exception e) {
                 errorMessage = e.getMessage();
             }
         } else {
-            soql = new SOQLQueryBuilder(fs.SObjectType)
+            soql = new QueryBuilder(fs.SObjectType)
                     .fieldSet(fs)
                     .soql();
         }

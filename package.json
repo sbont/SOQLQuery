@@ -1,8 +1,8 @@
 {
-  "name": "salesforce-app",
+  "name": "soql-query-builder",
   "private": true,
-  "version": "1.0.0",
-  "description": "Salesforce App",
+  "version": "0.1.0",
+  "description": "SOQLQueryBuilder",
   "scripts": {
     "lint": "npm run lint:lwc",
     "lint:lwc": "eslint force-app/main/default/lwc",
